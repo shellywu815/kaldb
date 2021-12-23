@@ -77,6 +77,10 @@ public class SnapshotMetadata extends KaldbMetadata {
     this.partitionId = partitionId;
   }
 
+  public String getSnapshotPath() {
+    return snapshotPath;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
