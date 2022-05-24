@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -53,6 +55,8 @@ public class LogIndexSearcherImpl implements LogIndexSearcher<LogMessage> {
 
   private final SearcherManager searcherManager;
   private final StandardAnalyzer analyzer;
+
+  private final ForkJoinPool customForkJoinPool = new ForkJoinPool(4);
 
   @VisibleForTesting
   public static SearcherManager searcherManagerFromPath(Path path) throws IOException {
@@ -122,10 +126,14 @@ public class LogIndexSearcherImpl implements LogIndexSearcher<LogMessage> {
         if (howMany > 0) {
           ScoreDoc[] hits = topFieldCollector.topDocs().scoreDocs;
           results =
-              Stream.of(hits)
-                  .parallel()
-                  .map(hit -> buildLogMessage(searcher, hit))
-                  .collect(Collectors.toList());
+              customForkJoinPool
+                  .submit(
+                      () ->
+                          Stream.of(hits)
+                              .parallel()
+                              .map(hit -> buildLogMessage(searcher, hit))
+                              .collect(Collectors.toList()))
+                  .get();
         } else {
           results = Collections.emptyList();
         }
@@ -142,6 +150,8 @@ public class LogIndexSearcherImpl implements LogIndexSearcher<LogMessage> {
             0,
             1,
             1);
+      } catch (ExecutionException | InterruptedException e) {
+        throw new IllegalStateException(e);
       } finally {
         searcherManager.release(searcher);
       }
