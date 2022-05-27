@@ -109,11 +109,11 @@ public class ArmeriaService extends AbstractIdleService {
       return this;
     }
 
-    public Builder withGrpcService(BindableService grpcService) {
+    public Builder withGrpcService(BindableService grpcService, boolean enableUnframed) {
       GrpcServiceBuilder searchBuilder =
           GrpcService.builder()
               .addService(grpcService)
-              .enableUnframedRequests(true)
+              .enableUnframedRequests(enableUnframed)
               // if not using the client timeout header - separate, lower timeouts
               // should be configured for indexer / cache nodes than that of the query server
               .useClientTimeoutHeader(true)

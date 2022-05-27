@@ -149,7 +149,7 @@ public class Kaldb {
       ArmeriaService armeriaService =
           new ArmeriaService.Builder(serverPort, "kalDbIndex", prometheusMeterRegistry)
               .withTracingEndpoint(kaldbConfig.getTracingConfig().getZipkinEndpoint())
-              .withGrpcService(searcher)
+              .withGrpcService(searcher, false)
               .build();
       services.add(armeriaService);
     }
@@ -173,7 +173,7 @@ public class Kaldb {
           new ArmeriaService.Builder(serverPort, "kalDbQuery", prometheusMeterRegistry)
               .withTracingEndpoint(kaldbConfig.getTracingConfig().getZipkinEndpoint())
               .withAnnotatedService(new ElasticsearchApiService(kaldbDistributedQueryService))
-              .withGrpcService(kaldbDistributedQueryService)
+              .withGrpcService(kaldbDistributedQueryService, false)
               .build();
       services.add(armeriaService);
     }
@@ -193,7 +193,7 @@ public class Kaldb {
       ArmeriaService armeriaService =
           new ArmeriaService.Builder(serverPort, "kalDbCache", prometheusMeterRegistry)
               .withTracingEndpoint(kaldbConfig.getTracingConfig().getZipkinEndpoint())
-              .withGrpcService(searcher)
+              .withGrpcService(searcher, false)
               .build();
       services.add(armeriaService);
     }
@@ -215,7 +215,7 @@ public class Kaldb {
       ArmeriaService armeriaService =
           new ArmeriaService.Builder(serverPort, "kalDbManager", prometheusMeterRegistry)
               .withTracingEndpoint(kaldbConfig.getTracingConfig().getZipkinEndpoint())
-              .withGrpcService(new ManagerApiGrpc(serviceMetadataStore))
+              .withGrpcService(new ManagerApiGrpc(serviceMetadataStore), true)
               .build();
       services.add(armeriaService);
 
